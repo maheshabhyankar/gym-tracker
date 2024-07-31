@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Visit Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input, textarea {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        #visits {
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+        .visit {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gym Visit Tracker</h1>
+    
+    <form id="visitForm">
+        <input type="date" id="visitDate" required>
+        <textarea id="exercises" placeholder="Exercises performed" required></textarea>
+        <label>
+            <input type="checkbox" id="trainerAvailable">
+            Trainer was available
+        </label>
+        <button type="submit">Record Visit</button>
+    </form>
+
+    <div id="visits"></div>
+
+    <script>
+        const visitForm = document.getElementById('visitForm');
+        const visitsContainer = document.getElementById('visits');
+        let visits = JSON.parse(localStorage.getItem('gymVisits')) || [];
+
+        function displayVisits() {
+            visitsContainer.innerHTML = '';
+            visits.forEach((visit, index) => {
+                const visitElement = document.createElement('div');
+                visitElement.classList.add('visit');
+                visitElement.innerHTML = `
+                    <h3>Date: ${visit.date}</h3>
+                    <p>Exercises: ${visit.exercises}</p>
+                    <p>Trainer Available: ${visit.trainerAvailable ? 'Yes' : 'No'}</p>
+                    <button onclick="deleteVisit(${index})">Delete</button>
+                `;
+                visitsContainer.appendChild(visitElement);
+            });
+        }
+
+        function deleteVisit(index) {
+            visits.splice(index, 1);
+            localStorage.setItem('gymVisits', JSON.stringify(visits));
+            displayVisits();
+        }
+
+        visitForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newVisit = {
+                date: document.getElementById('visitDate').value,
+                exercises: document.getElementById('exercises').value,
+                trainerAvailable: document.getElementById('trainerAvailable').checked
+            };
+            visits.push(newVisit);
+            localStorage.setItem('gymVisits', JSON.stringify(visits));
+            displayVisits();
+            visitForm.reset();
+        });
+
+        displayVisits();
+    </script>
+</body>
+</html>
