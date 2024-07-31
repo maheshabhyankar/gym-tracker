@@ -46,45 +46,49 @@
     <div id="visits"></div>
 
     <script>
-        const visitForm = document.getElementById('visitForm');
-        const visitsContainer = document.getElementById('visits');
-        let visits = JSON.parse(localStorage.getItem('gymVisits')) || [];
+    const visitForm = document.getElementById('visitForm');
+    const visitsContainer = document.getElementById('visits');
+    const webAppUrl = 'https://script.google.com/macros/s/AKfycbwT8E7ktNqacF-7txQnBXq5MPkMykIooCIL6dAOz7BAGDjf5JwHZoaStQI19AnUAy9U0g/exec';
 
-        function displayVisits() {
-            visitsContainer.innerHTML = '';
-            visits.forEach((visit, index) => {
-                const visitElement = document.createElement('div');
-                visitElement.classList.add('visit');
-                visitElement.innerHTML = `
-                    <h3>Date: ${visit.date}</h3>
-                    <p>Exercises: ${visit.exercises}</p>
-                    <p>Trainer Available: ${visit.trainerAvailable ? 'Yes' : 'No'}</p>
-                    <button onclick="deleteVisit(${index})">Delete</button>
-                `;
-                visitsContainer.appendChild(visitElement);
-            });
-        }
+    async function fetchVisits() {
+        const response = await fetch(webAppUrl);
+        const visits = await response.json();
+        return visits;
+    }
 
-        function deleteVisit(index) {
-            visits.splice(index, 1);
-            localStorage.setItem('gymVisits', JSON.stringify(visits));
-            displayVisits();
-        }
+    async function displayVisits() {
+        visitsContainer.innerHTML = '';
+        const visits = await fetchVisits();
+        visits.forEach((visit, index) => {
+            const visitElement = document.createElement('div');
+            visitElement.classList.add('visit');
+            visitElement.innerHTML = `
+                <h3>Date: ${visit.Date}</h3>
+                <p>Exercises: ${visit.Exercises}</p>
+                <p>Trainer Available: ${visit.TrainerAvailable}</p>
+            `;
+            visitsContainer.appendChild(visitElement);
+        });
+    }
 
-        visitForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const newVisit = {
-                date: document.getElementById('visitDate').value,
-                exercises: document.getElementById('exercises').value,
-                trainerAvailable: document.getElementById('trainerAvailable').checked
-            };
-            visits.push(newVisit);
-            localStorage.setItem('gymVisits', JSON.stringify(visits));
-            displayVisits();
-            visitForm.reset();
+    visitForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const newVisit = {
+            date: document.getElementById('visitDate').value,
+            exercises: document.getElementById('exercises').value,
+            trainerAvailable: document.getElementById('trainerAvailable').checked
+        };
+        
+        await fetch(webAppUrl, {
+            method: 'POST',
+            body: JSON.stringify(newVisit)
         });
 
-        displayVisits();
-    </script>
+        await displayVisits();
+        visitForm.reset();
+    });
+
+    displayVisits();
+</script>
 </body>
 </html>
